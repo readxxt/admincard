@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Collector - Admin Panel</title>
+    <style>
+        :root {
+            --bg: #0a0e14;
+            --card-bg: #12171f;
+            --border: #1e2a38;
+            --text: #c8d6e5;
+            --accent: #f7931e;
+            --green: #0ecd7a;
+            --red: #f04444;
+            --blue: #3498db;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-left h1 {
+            font-size: 22px;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        .header-left p { font-size: 12px; color: #5a6e85; }
+        .header-right { display: flex; gap: 10px; }
+        .btn {
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-refresh { background: var(--accent); color: #000; }
+        .btn-refresh:hover { background: #ffa842; }
+        .btn-clear { background: transparent; border: 1px solid var(--red); color: var(--red); }
+        .btn-clear:hover { background: rgba(240,68,68,0.1); }
+        .btn-export { background: transparent; border: 1px solid var(--blue); color: var(--blue); }
+        .btn-export:hover { background: rgba(52,152,219,0.1); }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+        }
+        .stat-card .icon { font-size: 28px; margin-bottom: 8px; }
+        .stat-card .number { font-size: 36px; font-weight: 800; color: var(--accent); }
+        .stat-card .label { font-size: 11px; color: #5a6e85; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .table-header h3 { font-size: 16px; color: var(--text); }
+        .search-box {
+            background: #0a0e14;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: var(--text);
+            font-size: 13px;
+            width: 250px;
+            outline: none;
+        }
+        .search-box:focus { border-color: var(--accent); }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th {
+            background: #0a0e14;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #5a6e85;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+        }
+        td {
+            padding: 10px 12px;
+            font-size: 12px;
+            border-bottom: 1px solid #1a2433;
+            word-break: break-all;
+        }
+        tr:hover td { background: rgba(247,147,30,0.03); }
+        .code-cell { color: var(--red); font-weight: 600; font-family: 'Courier New', monospace; }
+        .serial-cell { color: #ff6b6b; font-weight: 600; font-family: 'Courier New', monospace; }
+        .status-new { color: var(--green); font-weight: 600; }
+        .status-used { color: #5a6e85; }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .badge-success { background: rgba(14,205,122,0.15); color: var(--green); }
+        .badge-warning { background: rgba(247,147,30,0.15); color: var(--accent); }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #5a6e85;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .pagination button {
+            padding: 6px 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .pagination button:hover { border-color: var(--accent); color: var(--accent); }
+        .pagination button.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--green);
+            border-radius: 8px;
+            padding: 12px 18px;
+            color: var(--green);
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.show { display: block; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            width: 500px;
+            max-width: 90vw;
+        }
+        .modal h3 { margin-bottom: 16px; color: var(--accent); }
+        .modal .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1a2433;
+            font-size: 13px;
+        }
+        .modal .detail-row .lbl { color: #5a6e85; }
+        .modal .detail-row .val { color: var(--text); font-weight: 600; }
+        .modal .btn-close {
+            margin-top: 16px;
+            width: 100%;
+            padding: 10px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>💀 CARD COLLECTOR v2.0</h1>
+                <p>Hệ thống thu thập dữ liệu thẻ | <span id="serverTime"></span></p>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-refresh" onclick="refreshAll()">🔄 Làm mới</button>
+                <button class="btn btn-export" onclick="exportData()">📥 Xuất CSV</button>
+                <button class="btn btn-clear" onclick="clearAll()">🗑 Xóa tất cả</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="icon">💳</div>
+                <div class="number" id="statCards">0</div>
+                <div class="label">Thẻ đã thu thập</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">👤</div>
+                <div class="number" id="statUsers">0</div>
+                <div class="label">Tài khoản đăng ký</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🔑</div>
+                <div class="number" id="statLogins">0</div>
+                <div class="label">Lượt đăng nhập</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💰</div>
+                <div class="number" id="statTotal">0đ</div>
+                <div class="label">Tổng giá trị thẻ</div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>📋 Danh sách thẻ đã thu thập (<span id="cardCount">0</span>)</h3>
+                <input type="text" class="search-box" id="searchInput" placeholder="🔍 Tìm kiếm mã thẻ, seri, ID..." oninput="filterCards()">
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Thời gian</th>
+                            <th>Tài khoản</th>
+                            <th>ID Player</th>
+                            <th>Loại thẻ</th>
+                            <th>Mã thẻ</th>
+                            <th>Số Seri</th>
+                            <th>Mệnh giá</th>
+                            <th>KC</th>
+                            <th>IP</th>
+                            <th>TT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cardsTableBody">
+                        <tr><td colspan="11" class="empty-state"><div class="icon">📭</div>Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <h3>📋 Chi tiết thẻ</h3>
+            <div id="detailContent"></div>
+            <button class="btn-close" onclick="closeModal()">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // CONFIG
+        // ============================================================
+        const ITEMS_PER_PAGE = 20;
+        let allCards = [];
+        let filteredCards = [];
+        let currentPage = 1;
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadAllData();
+            setInterval(loadAllData, 15000);
+        }
+
+        function updateTime() {
+            document.getElementById('serverTime').textContent = new Date().toLocaleString('vi-VN');
+        }
+
+        // ============================================================
+        // LOAD DATA FROM LOCAL STORAGE
+        // ============================================================
+        function loadAllData() {
+            // Load cards
+            const cardsData = localStorage.getItem('napthe_data');
+            allCards = cardsData ? JSON.parse(cardsData) : [];
+            
+            // Load registers
+            const registersData = localStorage.getItem('napthe_registers');
+            const registers = registersData ? JSON.parse(registersData) : [];
+            
+            // Load logins
+            const loginsData = localStorage.getItem('napthe_logins');
+            const logins = loginsData ? JSON.parse(loginsData) : [];
+
+            // Load users
+            const usersData = localStorage.getItem('napthe_users');
+            const users = usersData ? JSON.parse(usersData) : [];
+
+            // Update stats
+            document.getElementById('statCards').textContent = allCards.length;
+            document.getElementById('statUsers').textContent = users.length;
+            document.getElementById('statLogins').textContent = logins.length;
+
+            // Calculate total amount
+            let totalAmount = 0;
+            allCards.forEach(card => {
+                const amount = parseInt(card.amount) || 0;
+                totalAmount += amount;
+            });
+            document.getElementById('statTotal').textContent = totalAmount.toLocaleString() + 'đ';
+
+            // Filter and render
+            filteredCards = [...allCards].reverse();
+            document.getElementById('cardCount').textContent = filteredCards.length;
+            currentPage = 1;
+            renderTable();
+        }
+
+        // ============================================================
+        // RENDER TABLE
+        // ============================================================
+        function renderTable() {
+            const tbody = document.getElementById('cardsTableBody');
+            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const pageCards = filteredCards.slice(start, start + ITEMS_PER_PAGE);
+
+            if (pageCards.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" class="empty-state">
+                    <div class="icon">📭</div>Chưa có dữ liệu thẻ nào
+                </td></tr>`;
+            } else {
+                tbody.innerHTML = pageCards.map((card, index) => `
+                    <tr onclick="showDetail(${start + index})" style="cursor:pointer;">
+                        <td>${start + index + 1}</td>
+                        <td>${formatDate(card.timestamp)}</td>
+                        <td><span class="badge badge-warning">${escapeHtml(card.username || 'khach')}</span></td>
+                        <td>${escapeHtml(card.playerID || '-')}</td>
+                        <td>${getCardTypeName(card.cardType)}</td>
+                        <td class="code-cell">${escapeHtml(card.cardCode || '-')}</td>
+                        <td class="serial-cell">${escapeHtml(card.cardSerial || '-')}</td>
+                        <td><strong>${formatAmount(card.amount)}</strong></td>
+                        <td><span class="badge badge-success">${card.kc || '0'} KC</span></td>
+                        <td style="font-size:11px;color:#5a6e85;">${card.ip || 'local'}</td>
+                        <td><span class="status-new">● new</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render pagination
+            const pagination = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+            } else {
+                let paginationHtml = '';
+                paginationHtml += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">← Trước</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                }
+                paginationHtml += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">Sau →</button>`;
+                pagination.innerHTML = paginationHtml;
+            }
+        }
+
+        // ============================================================
+        // FILTER
+        // ============================================================
+        function filterCards() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (query === '') {
+                filteredCards = [...allCards].reverse();
+            } else {
+                filteredCards = allCards.filter(card => {
+                    return (card.cardCode && card.cardCode.toLowerCase().includes(query)) ||
+                           (card.cardSerial && card.cardSerial.toLowerCase().includes(query)) ||
+                           (card.playerID && card.playerID.toLowerCase().includes(query)) ||
+                           (card.username && card.username.toLowerCase().includes(query)) ||
+                           (card.cardType && card.cardType.toLowerCase().includes(query));
+                }).reverse();
+            }
+            document.getElementById('cardCount').textContent = filteredCards.length;
+            currentPage = 1;
+            renderTable();
+        }
+
+        // ============================================================
+        // PAGINATION
+        // ============================================================
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+        }
+
+        // ============================================================
+        // DETAIL MODAL
+        // ============================================================
+        function showDetail(index) {
+            const card = filteredCards[index];
+            if (!card) return;
+            document.getElementById('detailContent').innerHTML = `
+                <div class="detail-row"><span class="lbl">Thời gian:</span><span class="val">${formatDate(card.timestamp)}</span></div>
+                <div class="detail-row"><span class="lbl">Tài khoản:</span><span class="val">${escapeHtml(card.username || 'khach')}</span></div>
+                <div class="detail-row"><span class="lbl">ID Player:</span><span class="val">${escapeHtml(card.playerID || '-')}</span></div>
+                <div class="detail-row"><span class="lbl">Loại thẻ:</span><span class="val">${getCardTypeName(card.cardType)}</span></div>
+                <div class="detail-row"><span class="lbl">Mã thẻ:</span><span class="val" style="color:#f04444;">${escapeHtml(card.cardCode || '-')}</span></div>
+                <div class="detail-row"><span class="lbl">Số Seri:</span><span class="val" style="color:#ff6b6b;">${escapeHtml(card.cardSerial || '-')}</span></div>
+                <div class="detail-row"><span class="lbl">Mệnh giá:</span><span class="val">${formatAmount(card.amount)}</span></div>
+                <div class="detail-row"><span class="lbl">Kim Cương:</span><span class="val">${card.kc || '0'} KC</span></div>
+                <div class="detail-row"><span class="lbl">User Agent:</span><span class="val" style="font-size:10px;">${escapeHtml(card.ua || '-')}</span></div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ============================================================
+        // EXPORT CSV
+        // ============================================================
+        function exportData() {
+            if (allCards.length === 0) {
+                showToast('⚠️ Không có dữ liệu để xuất!');
+                return;
+            }
+            let csv = 'ID,Thời gian,Tài khoản,Player ID,Loại thẻ,Mã thẻ,Số Seri,Mệnh giá,KC\n';
+            allCards.forEach((card, i) => {
+                csv += `${i+1},"${formatDate(card.timestamp)}","${card.username || 'khach'}","${card.playerID || ''}","${getCardTypeName(card.cardType)}","${card.cardCode || ''}","${card.cardSerial || ''}","${formatAmount(card.amount)}","${card.kc || '0'}"\n`;
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cards_data_' + new Date().toISOString().slice(0,10) + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Xuất dữ liệu thành công!');
+        }
+
+        // ============================================================
+        // CLEAR ALL
+        // ============================================================
+        function clearAll() {
+            if (confirm('⚠️ Bạn có chắc chắn muốn xóa TẤT CẢ dữ liệu thẻ đã thu thập?\nHành động này không thể hoàn tác!')) {
+                localStorage.removeItem('napthe_data');
+                allCards = [];
+                filteredCards = [];
+                document.getElementById('searchInput').value = '';
+                loadAllData();
+                showToast('🗑 Đã xóa tất cả dữ liệu!');
+            }
+        }
+
+        // ============================================================
+        // REFRESH
+        // ============================================================
+        function refreshAll() {
+            loadAllData();
+            document.getElementById('searchInput').value = '';
+            showToast('🔄 Dữ liệu đã được làm mới!');
+        }
+
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const d = new Date(dateStr);
+                return d.toLocaleString('vi-VN', { 
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch(e) {
+                return dateStr;
+            }
+        }
+
+        function formatAmount(amount) {
+            if (!amount) return '-';
+            return parseInt(amount).toLocaleString() + 'đ';
+        }
+
+        function getCardTypeName(type) {
+            const types = {
+                'viettel': '🇻🇳 Viettel',
+                'mobifone': '🇻🇳 Mobifone',
+                'vinaphone': '🇻🇳 Vinaphone',
+                'vietnamobile': '🇻🇳 Vietnamobile'
+            };
+            return types[type] || type || '-';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '-';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
+
+        // ============================================================
+        // START
+        // ============================================================
+        init();
+    </script>
+</body>
+</html>
