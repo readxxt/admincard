@@ -268,27 +268,6 @@
             margin-right: 4px;
         }
 
-        /* LOADING */
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
-        .loading-overlay.show { display: flex; }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #1f2633;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
         @media (max-width: 600px) {
             .header { flex-direction: column; text-align: center; }
             .header-right { justify-content: center; }
@@ -429,11 +408,6 @@
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
-    <!-- LOADING -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-    </div>
-
     <script>
         // ============================================================
         // CONFIG
@@ -474,7 +448,6 @@
         // LOAD ALL DATA
         // ============================================================
         async function refreshAll() {
-            showLoading(true);
             document.getElementById('lastUpdate').textContent = 'Đang tải...';
 
             // Load stats
@@ -521,7 +494,6 @@
             }
 
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('vi-VN');
-            showLoading(false);
             showToast('✅ Dữ liệu đã được cập nhật');
         }
 
@@ -705,9 +677,6 @@
             toast.textContent = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-        function showLoading(s) {
-            document.getElementById('loadingOverlay').classList.toggle('show', s);
         }
 
         // ============================================================
